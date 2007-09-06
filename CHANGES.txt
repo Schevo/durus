@@ -1,3 +1,8 @@
+3.7-schevo2:
+
+     * Bug fix when using Python in optimized mode.
+       See http://mail.mems-exchange.org/durusmail/durus-users/891/
+
 3.7-schevo1:
 
      * Temporary fork of Durus 3.7 to fix Windows compatibility issues.

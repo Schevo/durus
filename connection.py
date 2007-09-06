@@ -58,7 +58,8 @@ class Connection (ConnectionBase):
         self.cache = Cache(cache_size)
         self.root = self.get(ROOT_OID)
         if self.root is None:
-            assert ROOT_OID == self.new_oid()
+            new_oid = self.new_oid()
+            assert ROOT_OID == new_oid
             self.root = self.get_cache().get_instance(
                 ROOT_OID, root_class or PersistentDict, self)
             self.root._p_set_status_saved()
