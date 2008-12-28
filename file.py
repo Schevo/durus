@@ -1,6 +1,6 @@
 """
 $URL: svn+ssh://svn.mems-exchange.org/repos/trunk/durus/file.py $
-$Id: file.py 29734 2007-04-13 22:25:18Z dbinger $
+$Id: file.py 31249 2008-10-28 21:49:21Z dbinger $
 """
 import os, os.path
 from os.path import exists
@@ -25,19 +25,12 @@ class File (object):
                 else:
                     self.file = open(name, 'r+b')
             else:
+                if readonly:
+                    raise OSError('No "%s" found.' % name)
                 self.file = open(name, 'w+b')
         if readonly:
             assert self.is_readonly()
         self.has_lock = False
-        self.attach_methods()
-
-    def attach_methods(self):
-        """
-        Assign methods from self.file directly to self for those
-        methods that do not require additional behavior.
-        """
-        self.read = self.file.read
-        self.tell = self.file.tell
 
     def get_name(self):
         return self.file.name
@@ -51,10 +44,19 @@ class File (object):
     def seek(self, n, whence=0):
         self.file.seek(n, whence)
         if whence == 0:
-            assert self.tell() == n
+            assert self.file.tell() == n
 
     def seek_end(self):
         self.file.seek(0, 2)
+
+    def read(self, n=None):
+        if n is None:
+            return self.file.read()
+        else:
+            return self.file.read(n)
+
+    def tell(self):
+        return self.file.tell()
 
     def stat(self):
         return os.stat(self.get_name())
@@ -73,64 +75,48 @@ class File (object):
             os.unlink(name)
         os.rename(old_name, name)
         self.file = open(name, 'r+b')
-        self.attach_methods()
         self.obtain_lock()
 
-    if os.name == 'nt':
-        def obtain_lock(self):
-            """
-            Make sure that we have an exclusive lock on self.file before
-            doing a write.
-            If the lock is not available, raise an exception.
-            """
-            assert not self.is_readonly()
-            if not self.has_lock:
-                win32file.LockFileEx(
-                    win32file._get_osfhandle(self.file.fileno()),
-                    (win32con.LOCKFILE_EXCLUSIVE_LOCK |
-                     win32con.LOCKFILE_FAIL_IMMEDIATELY),
-                    0, -65536, pywintypes.OVERLAPPED())
-                self.has_lock = True
-    else:
-        def obtain_lock(self):
-            """
-            Make sure that we have an exclusive lock on self.file before
-            doing a write.
-            If the lock is not available, raise an exception.
-            """
-            assert not self.is_readonly()
-            if not self.has_lock:
+    def obtain_lock(self):
+        """
+        Make sure that we have an exclusive lock on self.file before
+        doing a write.
+        If the lock is not available, raise an exception.
+        """
+        assert not self.is_readonly()
+        if not self.has_lock:
+            if os.name == 'nt':
+                try:
+                    win32file.LockFileEx(
+                        win32file._get_osfhandle(self.file.fileno()),
+                        (win32con.LOCKFILE_EXCLUSIVE_LOCK |
+                         win32con.LOCKFILE_FAIL_IMMEDIATELY),
+                        0, -65536, pywintypes.OVERLAPPED())
+                except pywintypes.error:
+                    raise IOError("Unable to obtain lock")
+            else:
                 fcntl.flock(self.file, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                self.has_lock = True
+            self.has_lock = True
 
-    if os.name == 'nt':
-        def release_lock(self):
-            """
-            Make sure that we do not retain an exclusive lock on self.file.
-            """
-            if self.has_lock:
+    def release_lock(self):
+        """
+        Make sure that we do not retain an exclusive lock on self.file.
+        """
+        if self.has_lock:
+            if os.name == 'nt':
                 win32file.UnlockFileEx(
                     win32file._get_osfhandle(self.file.fileno()),
                     0, -65536, pywintypes.OVERLAPPED())
-                self.has_lock = False
-    else:
-        def release_lock(self):
-            """
-            Make sure that we do not retain an exclusive lock on self.file.
-            """
-            if self.has_lock:
+            else:
                 fcntl.flock(self.file, fcntl.LOCK_UN)
-                self.has_lock = False
-        
-    if os.name == 'nt':
-        def write(self, s):
-            self.obtain_lock()
-            self.file.write(s)
+            self.has_lock = False
+
+    def write(self, s):
+        self.obtain_lock()
+        self.file.write(s)
+        if os.name == 'nt':
+            # This flush helps the file knows where it ends.
             self.file.flush()
-    else:
-        def write(self, s):
-            self.obtain_lock()
-            self.file.write(s)
 
     def truncate(self):
         self.obtain_lock()
@@ -143,9 +129,6 @@ class File (object):
     def flush(self):
         self.file.flush()
 
-    if hasattr(os, 'fsync'):
-        def fsync(self):
+    def fsync(self):
+        if hasattr(os, 'fsync'):
             os.fsync(self.file)
-    else:
-        def fsync(self):
-            pass

@@ -1,10 +1,10 @@
 """
 $URL: svn+ssh://svn.mems-exchange.org/repos/trunk/durus/test/utest_storage_server.py $
-$Id: utest_storage_server.py 29090 2006-11-27 14:02:24Z dbinger $
+$Id: utest_storage_server.py 30403 2008-01-03 17:16:00Z dbinger $
 """
 from durus.file_storage import TempFileStorage
 from durus.storage_server import StorageServer
-from durus.utils import read
+from durus.utils import read, as_bytes
 from random import choice
 from sancho.utest import UTest
 
@@ -21,7 +21,7 @@ class Test (UTest):
     def check_receive(self):
         class Dribble:
             def recv(x, n):
-                return choice(['a', 'bb'])[:n]
+                return as_bytes(choice(['a', 'bb'])[:n])
         fake_socket = Dribble()
         read(fake_socket, 30)
 

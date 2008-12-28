@@ -1,6 +1,6 @@
 """
 $URL: svn+ssh://svn.mems-exchange.org/repos/trunk/durus/storage.py $
-$Id: storage.py 29090 2006-11-27 14:02:24Z dbinger $
+$Id: storage.py 30669 2008-04-04 19:05:52Z dbinger $
 """
 from collections import deque
 from durus.serialize import unpack_record, split_oids, extract_class_name
@@ -64,12 +64,6 @@ class Storage (object):
 
     def pack(self):
         """If this storage supports it, remove obsolete records."""
-        return None
-
-    def get_size(self):
-        """() -> int | None
-        Return the number of objects available, or None if the number is not known.
-        """
         return None
 
     def bulk_load(self, oids):

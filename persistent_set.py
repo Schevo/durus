@@ -1,6 +1,6 @@
 """
 $URL: svn+ssh://svn.mems-exchange.org/repos/trunk/durus/persistent_set.py $
-$Id: persistent_set.py 28948 2006-10-19 18:26:06Z dbinger $
+$Id: persistent_set.py 31330 2008-11-20 17:26:51Z dbinger $
 """
 from durus.persistent import PersistentObject
 
@@ -8,7 +8,7 @@ class PersistentSet (PersistentObject):
 
     __slots__ = ['s']
 
-    s_is = set
+    s_is = set # for type checking using QP's spec module
 
     def __init__(self, *args):
         self.s = set(*args)
@@ -19,8 +19,8 @@ class PersistentSet (PersistentObject):
         else:
             return self.__class__(self.s & other)
 
-    def __cmp__(self, other):
-        raise TypeError("cannot compare PersistentSets using cmp()")
+    # def __cmp__(self, other):
+    #     raise TypeError("cannot compare PersistentSets using cmp()")
 
     def __contains__(self, item):
         return item in self.s

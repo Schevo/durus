@@ -1,17 +1,13 @@
 """
 $URL: svn+ssh://svn.mems-exchange.org/repos/trunk/durus/test/utest_file.py $
-$Id: utest_file.py 29120 2006-12-05 23:10:57Z dbinger $
+$Id: utest_file.py 31256 2008-11-03 12:27:24Z dbinger $
 """
 from durus.file import File
-from sancho.utest import UTest, raises
+from durus.utils import as_bytes
 from os import unlink
 from os.path import exists
+from sancho.utest import UTest, raises
 from tempfile import mktemp
-
-import os
-if os.name == 'nt':
-    import pywintypes
-
 
 class FileTest (UTest):
 
@@ -28,26 +24,23 @@ class FileTest (UTest):
         assert not g.is_temporary()
         g.rename(g.get_name() + '.renamed')
         assert g.get_name() == test_name + '.renamed'
-        f.write('abc')
+        f.write(as_bytes('abc'))
         f.seek(0)
         assert len(f) == 3
-        assert 'a' == f.read(1)
-        assert 'bc' == f.read()
+        assert as_bytes('a') == f.read(1)
+        assert as_bytes('bc') == f.read()
         f.close()
         assert not exists(f.get_name())
         raises(OSError, f.__len__) # tmpfile removed on close
         h = File(g.get_name())
-        g.write('a')
+        g.write(as_bytes('a'))
         g.seek(0)
         assert g.tell() == 0
         g.seek_end()
         assert g.tell() == 1
         assert g.has_lock
         assert not h.has_lock
-        if os.name == 'nt':
-            raises(pywintypes.error, h.write, 'b')
-        else:
-            raises(IOError, h.write, 'b')
+        raises(IOError, h.write, as_bytes('b'))
         g.flush()
         g.fsync()
         g.seek(0)
@@ -58,11 +51,15 @@ class FileTest (UTest):
 
     def b(self):
         name = mktemp()
-        raises(AssertionError, File, name, readonly=True)
+        raises(OSError, File, name, readonly=True)
+        g = File(name, readonly=False)
+        g.close()
         f = File(name, readonly=True)
         assert f.is_readonly()
         raises(AssertionError, f.write, 'ok')
         raises(IOError, f.file.write, 'ok') # readonly file
+        f.close()
+        unlink(name)
 
     def c(self):
         name = mktemp()

@@ -1,10 +1,10 @@
 """
 $URL: svn+ssh://svn.mems-exchange.org/repos/trunk/durus/error.py $
-$Id: error.py 29090 2006-11-27 14:02:24Z dbinger $
+$Id: error.py 30058 2007-09-06 11:40:45Z dbinger $
 """
 from durus.utils import str_to_int8
 
-class DurusError (StandardError):
+class DurusError (Exception):
     """Durus error."""
 
 class DurusKeyError (KeyError, DurusError):
