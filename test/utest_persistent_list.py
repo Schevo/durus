@@ -1,6 +1,6 @@
 """
 $URL: svn+ssh://svn.mems-exchange.org/repos/trunk/durus/test/utest_persistent_list.py $
-$Id: utest_persistent_list.py 30862 2008-06-18 14:13:35Z dbinger $
+$Id: utest_persistent_list.py 31432 2009-02-02 15:09:57Z dbinger $
 """
 from durus.connection import Connection
 from durus.persistent_list import PersistentList
@@ -57,7 +57,6 @@ class PersistentListTest (UTest):
         assert not p > p2
         p.append(3)
         assert p != p2
-        assert cmp(p, p2) == 1
 
     def delete(self):
         p = PersistentList(x for x in interval(10))

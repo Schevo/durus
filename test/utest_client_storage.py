@@ -1,6 +1,6 @@
 """
 $URL: svn+ssh://svn.mems-exchange.org/repos/trunk/durus/test/utest_client_storage.py $
-$Id: utest_client_storage.py 30751 2008-05-22 15:54:38Z rmasse $
+$Id: utest_client_storage.py 31518 2009-03-11 20:03:47Z dbinger $
 """
 from durus import __main__
 from durus.client_storage import ClientStorage
@@ -48,6 +48,7 @@ class ClientTest (UTest):
             cmd.append("--port=%s" % self.address[1])
         else:
             cmd.append("--address=%s" % self.address)
+        cmd.append("--logginglevel=1")
         output = open(devnull, 'w')
         #output = sys.__stdout__
         Popen(cmd, stdout=output, stderr=output)
@@ -130,6 +131,22 @@ class ClientTest (UTest):
         r1['b']['new'].bogus
         assert c1.get(a_oid).__class__ == Persistent
         s1.close()
+
+    def check_oid_reuse_with_invalidation(self):
+        connection = Connection(ClientStorage(address=self.address))
+        root = connection.get_root()
+        root['x'] = Persistent()
+        connection.commit()
+        connection = Connection(ClientStorage(address=self.address))
+        root = connection.get_root()
+        root['x'] = Persistent()
+        connection.commit()
+        connection.pack()
+        sleep(1) # Make sure pack finishes.
+        connection = Connection(ClientStorage(address=self.address))
+        root = connection.get_root()
+        root['x'] = Persistent()
+        connection.commit()
 
     def check_write_conflict(self):
         s1 = ClientStorage(address=self.address)

@@ -1,6 +1,6 @@
 """
 $URL: svn+ssh://svn.mems-exchange.org/repos/trunk/durus/test/utest_shelf.py $
-$Id: utest_shelf.py 30390 2008-01-03 01:18:05Z dbinger $
+$Id: utest_shelf.py 31602 2009-04-29 21:46:54Z dbinger $
 """
 from sancho.utest import UTest, raises
 from durus.file import File
@@ -42,9 +42,9 @@ class ShelfTest (UTest):
 
     def d(self):
         s = BytesIO(as_bytes('nope'))
-        assert raises(AssertionError, Shelf, s)
+        assert raises(AssertionError, Shelf, s, readonly=True)
         s = BytesIO(as_bytes("SHELF-1\nbogus"))
-        assert raises(ShortRead, Shelf, s)
+        assert raises(ShortRead, Shelf, s, readonly=True)
 
     def e(self):
         f = File()

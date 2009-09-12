@@ -1,14 +1,15 @@
 """
 $URL: svn+ssh://svn.mems-exchange.org/repos/trunk/durus/setup.py $
-$Id: setup.py 31066 2008-09-10 14:16:21Z dbinger $
+$Id: setup.py 31598 2009-04-29 18:51:25Z dbinger $
 """
 from __init__ import __version__
 import re, sys, os
 assert sys.version >= "2.4"
 
 try:
+    assert 'USE_DISTUTILS' not in os.environ
     from setuptools import setup, Extension
-except ImportError:
+except (ImportError, AssertionError):
     from distutils.core import setup
     from distutils.extension import Extension
 

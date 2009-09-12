@@ -1,6 +1,6 @@
 """
 $URL: svn+ssh://svn.mems-exchange.org/repos/trunk/durus/shelf.py $
-$Id: shelf.py 31363 2008-11-26 01:57:39Z dbinger $
+$Id: shelf.py 31606 2009-04-30 10:29:03Z dbinger $
 """
 from durus.file import File
 from durus.utils import int8_to_str, str_to_int8, read_int8_str, IntArray
@@ -71,6 +71,8 @@ class Shelf (object):
             assert not repair
         elif not hasattr(file, 'seek'):
             file = File(file, readonly=readonly)
+        if not readonly:
+            file.obtain_lock()
         file.seek(0, 2) # seek end
         if file.tell() == 0:
             # The file is empty.
@@ -273,6 +275,9 @@ class Shelf (object):
 
     def __contains__(self, name):
         return self.get_position(name) != None
+
+    def get_offset_map(self):
+        return self.offset_map
 
     def get_file(self):
         return self.file

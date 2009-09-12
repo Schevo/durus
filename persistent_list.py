@@ -1,6 +1,6 @@
 """
 $URL: svn+ssh://svn.mems-exchange.org/repos/trunk/durus/persistent_list.py $
-$Id: persistent_list.py 31330 2008-11-20 17:26:51Z dbinger $
+$Id: persistent_list.py 31433 2009-02-02 15:10:18Z dbinger $
 """
 from durus.persistent import PersistentObject
 
@@ -37,9 +37,6 @@ class PersistentList (PersistentObject):
 
     def __ge__(self, other):
         return self is other or self.data >= self.__cast(other)
-
-    # def __cmp__(self, other):
-    #     return cmp(self.data, self.__cast(other))
 
     def __contains__(self, item):
         return item in self.data
